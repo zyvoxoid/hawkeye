@@ -30,25 +30,25 @@
     html{scroll-behavior:auto}
     *{animation-duration:.001ms!important; transition-duration:.001ms!important}
   }
-  .wrap{max-width:1180px; margin:0 auto}
+  .wrap{max-width:1320px; margin:0 auto}
   section{scroll-margin-top:78px}
   svg.ic{width:24px; height:24px; flex:none; display:block}
 
   h1,h2,h3,h4{margin:0; text-wrap:balance; letter-spacing:-.03em}
-  h1{font-size:clamp(38px,7.4vw,84px); line-height:1.0; font-weight:800}
-  h2{font-size:clamp(29px,4.8vw,54px); line-height:1.04; font-weight:800}
+  h1{font-size:clamp(36px,6.4vw,100px); line-height:1.0; font-weight:800; max-width:17ch}
+  h2{font-size:clamp(28px,4.2vw,62px); line-height:1.04; font-weight:800; max-width:20ch}
   h3{font-size:20px; line-height:1.2; font-weight:700; letter-spacing:-.02em}
   p{margin:0}
   .hl{color:var(--cy)}
-  .lede{font-size:clamp(16px,1.95vw,19.5px); line-height:1.58; color:var(--mut); max-width:66ch}
+  .lede{font-size:clamp(16px,1.35vw,19.5px); line-height:1.58; color:var(--mut); max-width:62ch}
   .lede b{color:var(--ink); font-weight:600}
-  .lede.big{font-size:clamp(17px,2.25vw,22px); line-height:1.5}
+  .lede.big{font-size:clamp(17px,1.6vw,22px); line-height:1.5; max-width:56ch}
 
   /* ---------- nav ---------- */
   .nav{position:sticky; top:0; z-index:40;
        background:rgba(7,12,17,.88); backdrop-filter:blur(14px);
        border-bottom:1px solid var(--line2); margin-inline:-16px; padding-inline:16px}
-  .navin{max-width:1180px; margin:0 auto; display:flex; align-items:center; gap:24px; height:64px}
+  .navin{max-width:1320px; margin:0 auto; display:flex; align-items:center; gap:24px; height:64px}
   .logo{display:flex; align-items:center; gap:9px; font-size:18px; font-weight:800;
         letter-spacing:-.03em; white-space:nowrap; color:var(--ink); text-decoration:none}
   .logo svg{width:22px; height:22px; color:var(--cy)}
@@ -63,7 +63,7 @@
 
   /* ---------- hero ---------- */
   .hero{position:relative; overflow:hidden;
-        padding-block:clamp(56px,9vw,112px) clamp(30px,4vw,48px)}
+        padding-block:clamp(48px,6.5vw,92px) clamp(30px,3.4vw,46px)}
   .heroglow{position:absolute; inset:-120px -40vw auto -40vw; height:620px; z-index:-2;
             background:radial-gradient(60% 70% at 50% 0%,rgba(var(--cyr),.13),transparent 70%)}
   .herogrid{position:absolute; inset:0 -40vw; z-index:-1; pointer-events:none;
@@ -77,7 +77,7 @@
              animation:sweep 8s linear infinite; pointer-events:none}
   @keyframes sweep{0%{transform:translateY(-60px)}100%{transform:translateY(560px)}}
   @keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}
-  .hero .lede{margin-top:26px; font-size:clamp(17px,2.2vw,22px); line-height:1.5}
+  .hero .lede{margin-top:26px; font-size:clamp(17px,1.55vw,23px); line-height:1.5; max-width:54ch}
   .herobtns{display:flex; gap:12px; flex-wrap:wrap; margin-top:34px}
   .btn{display:inline-flex; align-items:center; gap:10px; background:var(--cy); color:var(--void);
        text-decoration:none; font-size:16px; font-weight:800; letter-spacing:-.02em;
@@ -518,7 +518,7 @@
   <!-- ================= HERO ================= -->
   <header class="hero">
     <div class="heroglow"></div><div class="herogrid"></div><div class="herosweep"></div>
-    <h1>Weapon detection<br>on cameras that are<br><span class="hl">already on the wall</span>.</h1>
+    <h1>Weapon detection on cameras that are <span class="hl">already on the wall</span>.</h1>
     <p class="lede">Hawkeye is software, so there is no box to manufacture and nothing new to
       hang anywhere. It watches the IP cameras a building already owns. And if it suits you
       better, <b>it runs under your name instead of ours</b>.</p>
@@ -631,7 +631,7 @@
   <!-- ================= WHO DECIDES ================= -->
   <section class="sec" id="who">
     <div class="sechead">
-      <h2>Nothing happens<br>until a person says so.</h2>
+      <h2>Nothing happens until a person says so.</h2>
       <p class="lede big">The first objection anybody raises is the same one. What stops it
         locking down a building because somebody walked past carrying a tripod? Nothing needs
         to, because it never gets that far on its own. <b>It sends the alert to people your
@@ -725,7 +725,7 @@
   <!-- ================= SCOUTCAM ================= -->
   <section class="sec" id="scoutcam">
     <div class="sechead">
-      <h2>A camera can only see a gun<br>once it is already out.</h2>
+      <h2>A camera can only see a gun once it is already out.</h2>
       <p class="lede big">That is the ceiling on software like ours and it is worth saying
         plainly. ScoutCam is the hardware that gets past it. Millimetre wave, so it picks up
         a gun that is <b>still inside a bag or under a coat</b>, about sixty yards before
