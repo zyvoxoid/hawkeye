@@ -1,0 +1,1622 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Weapon detection software that runs on the IP cameras a building already owns, and can carry a partner brand.">
+<title>Hawkeye Weapon Detection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+  :root{
+    --void:#070C11; --panel:#0E161E; --panel2:#111C26;
+    --line:#1C2833; --line2:#131E27;
+    --ink:#FFFFFF; --mut:#8B9BA9; --dim:#4E5A66;
+    --cy:#5FE0DA; --cyr:95,224,218;
+    --amber:#E7A95C; --alarm:#FF5A4E;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --grot:'Space Grotesk','Plus Jakarta Sans',system-ui,sans-serif;
+    --serif:'Instrument Serif',Georgia,'Times New Roman',serif;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html{scroll-behavior:smooth; overflow-x:clip}
+  body{
+    margin:0; background:var(--void); color:var(--ink);
+    font-family:var(--sans); -webkit-font-smoothing:antialiased;
+    padding-inline:16px; overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *{animation-duration:.001ms!important; transition-duration:.001ms!important}
+  }
+  .wrap{max-width:1180px; margin:0 auto}
+  section{scroll-margin-top:78px}
+  svg.ic{width:24px; height:24px; flex:none; display:block}
+
+  h1,h2,h3,h4{margin:0; text-wrap:balance; letter-spacing:-.03em}
+  h1{font-size:clamp(38px,7.4vw,84px); line-height:1.0; font-weight:800}
+  h2{font-size:clamp(29px,4.8vw,54px); line-height:1.04; font-weight:800}
+  h3{font-size:20px; line-height:1.2; font-weight:700; letter-spacing:-.02em}
+  p{margin:0}
+  .hl{color:var(--cy)}
+  .lede{font-size:clamp(16px,1.95vw,19.5px); line-height:1.58; color:var(--mut); max-width:66ch}
+  .lede b{color:var(--ink); font-weight:600}
+  .lede.big{font-size:clamp(17px,2.25vw,22px); line-height:1.5}
+
+  /* ---------- nav ---------- */
+  .nav{position:sticky; top:0; z-index:40;
+       background:rgba(7,12,17,.88); backdrop-filter:blur(14px);
+       border-bottom:1px solid var(--line2); margin-inline:-16px; padding-inline:16px}
+  .navin{max-width:1180px; margin:0 auto; display:flex; align-items:center; gap:24px; height:64px}
+  .logo{display:flex; align-items:center; gap:9px; font-size:18px; font-weight:800;
+        letter-spacing:-.03em; white-space:nowrap; color:var(--ink); text-decoration:none}
+  .logo svg{width:22px; height:22px; color:var(--cy)}
+  .logo em{font-style:normal; color:var(--cy)}
+  .navlinks{display:flex; gap:22px; margin-left:auto}
+  .navlinks a{font-size:13.5px; color:var(--mut); text-decoration:none; white-space:nowrap}
+  .navlinks a:hover{color:var(--ink)}
+  .navcta{font-size:13.5px; font-weight:700; color:var(--void); background:var(--cy);
+          padding:9px 16px; border-radius:99px; text-decoration:none; white-space:nowrap}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--cy); outline-offset:3px; border-radius:5px}
+  @media (max-width:880px){ .navlinks{display:none} .navcta{margin-left:auto} }
+
+  /* ---------- hero ---------- */
+  .hero{position:relative; overflow:hidden;
+        padding-block:clamp(56px,9vw,112px) clamp(30px,4vw,48px)}
+  .heroglow{position:absolute; inset:-120px -40vw auto -40vw; height:620px; z-index:-2;
+            background:radial-gradient(60% 70% at 50% 0%,rgba(var(--cyr),.13),transparent 70%)}
+  .herogrid{position:absolute; inset:0 -40vw; z-index:-1; pointer-events:none;
+            background-image:linear-gradient(rgba(var(--cyr),.05) 1px,transparent 1px),
+                             linear-gradient(90deg,rgba(var(--cyr),.05) 1px,transparent 1px);
+            background-size:52px 52px;
+            -webkit-mask-image:radial-gradient(70% 62% at 50% 34%,#000,transparent 72%);
+            mask-image:radial-gradient(70% 62% at 50% 34%,#000,transparent 72%)}
+  .herosweep{position:absolute; left:-40vw; right:-40vw; top:0; height:190px; z-index:-1;
+             background:linear-gradient(180deg,transparent,rgba(var(--cyr),.08),transparent);
+             animation:sweep 8s linear infinite; pointer-events:none}
+  @keyframes sweep{0%{transform:translateY(-60px)}100%{transform:translateY(560px)}}
+  @keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}
+  .hero .lede{margin-top:26px; font-size:clamp(17px,2.2vw,22px); line-height:1.5}
+  .herobtns{display:flex; gap:12px; flex-wrap:wrap; margin-top:34px}
+  .btn{display:inline-flex; align-items:center; gap:10px; background:var(--cy); color:var(--void);
+       text-decoration:none; font-size:16px; font-weight:800; letter-spacing:-.02em;
+       padding:16px 28px; border-radius:10px; border:0; cursor:pointer; font-family:var(--sans)}
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--line)}
+  .btn.ghost:hover{border-color:var(--mut); filter:none}
+  .btn svg{width:18px; height:18px}
+  .rail{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px;
+        background:var(--line); border:1px solid var(--line); border-radius:14px;
+        overflow:hidden; margin-top:clamp(40px,6vw,66px)}
+  .rail > div{background:var(--void); padding:24px 22px; display:flex; gap:14px;
+              align-items:flex-start}
+  .rail svg{color:var(--cy); margin-top:1px}
+  .rail .t{font-size:16px; font-weight:700; letter-spacing:-.02em}
+  .rail .s{font-size:13.5px; color:var(--mut); line-height:1.45; margin-top:5px}
+
+  /* ---------- section frame ---------- */
+  .sec{padding-block:clamp(54px,8vw,100px); border-top:1px solid var(--line2)}
+  .sechead{display:flex; flex-direction:column; gap:16px; margin-bottom:38px}
+
+  /* ================= CONSOLE ================= */
+  .cwrap{border:1px solid var(--cline,var(--line)); border-radius:calc(var(--crad,4px) + 8px);
+         background:var(--cpanel,var(--panel)); overflow:hidden;
+         transition:background .45s ease,border-color .45s ease}
+  .brandbar{display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+            padding:15px 17px; border-bottom:1px solid var(--cline,var(--line))}
+  .bk{font-family:var(--mono); font-size:9.5px; letter-spacing:.2em;
+      text-transform:uppercase; color:var(--cy)}
+  .chips{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{display:inline-flex; align-items:center; gap:8px; font-family:var(--sans);
+        font-size:12.5px; font-weight:600; letter-spacing:-.015em; padding:8px 14px;
+        border-radius:99px; cursor:pointer; background:transparent; color:var(--mut);
+        border:1px solid var(--cline,var(--line)); transition:all .25s}
+  .chip svg{width:15px; height:15px}
+  .chip:hover{color:var(--ink)}
+  .chip.on{background:var(--cy); color:#06121A; border-color:var(--cy)}
+  .bn{margin-left:auto; font-size:11.5px; color:var(--mut); max-width:38ch; line-height:1.4}
+
+  .cmast{display:flex; align-items:center; gap:13px; flex-wrap:wrap;
+         padding:16px 17px; border-bottom:1px solid var(--cline,var(--line))}
+  #clogo{width:26px; height:26px; color:var(--cy); flex:none}
+  #clogo svg{width:26px; height:26px}
+  #cname{font-family:var(--cfont,var(--sans)); font-weight:var(--cweight,800);
+         font-size:var(--csize,19px); letter-spacing:var(--ctrack,-.03em); color:var(--ink);
+         line-height:1}
+  #csub{font-family:var(--clabf,var(--mono)); font-size:var(--clabs,9px);
+        letter-spacing:var(--clabt,.2em); text-transform:var(--clabc,uppercase);
+        color:var(--cy); padding-left:13px; border-left:1px solid var(--cline,var(--line))}
+  .sim{margin-left:auto; display:flex; align-items:center; gap:7px;
+       font-family:var(--mono); font-size:9px; letter-spacing:.16em; text-transform:uppercase;
+       color:var(--amber); border:1px solid rgba(231,169,92,.4);
+       background:rgba(231,169,92,.08); padding:6px 11px; border-radius:99px}
+  .sim i{width:5px;height:5px;border-radius:99px;background:var(--amber);display:block;
+         animation:bl 2s ease-in-out infinite}
+
+  .cgrid{display:grid; grid-template-columns:minmax(0,1.62fr) minmax(280px,1fr)}
+  .cleft{min-width:0; border-right:1px solid var(--cline,var(--line))}
+  #field{display:block; width:100%; background:var(--cfield,#050A0E)}
+
+  .pulsebar{display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+            padding:10px 15px; border-top:1px solid var(--cline,var(--line))}
+  .pulsebar .lbl{font-family:var(--clabf,var(--mono)); font-size:var(--clabs,9px);
+                 letter-spacing:var(--clabt,.2em); text-transform:var(--clabc,uppercase);
+                 color:var(--cy)}
+  .numstrip{flex:1; min-width:150px; display:flex; gap:7px; overflow:hidden;
+            font-family:var(--mono); font-size:10px; color:var(--dim);
+            font-variant-numeric:tabular-nums; white-space:nowrap}
+  .numstrip span.hot{color:var(--cy); font-weight:700}
+  .pulsebar .cnt{font-family:var(--mono); font-size:9.5px; letter-spacing:.12em;
+                 text-transform:uppercase; color:var(--mut); font-variant-numeric:tabular-nums}
+
+  .sigs{border-top:1px solid var(--cline,var(--line)); padding:15px;
+        display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px 20px}
+  .sig{display:grid; grid-template-columns:1fr auto; gap:5px 8px; align-items:center}
+  .sig .nm{font-size:12px; font-weight:600; color:var(--mut)}
+  .sig .v{font-family:var(--mono); font-size:10.5px; color:var(--mut); text-align:right;
+          font-variant-numeric:tabular-nums}
+  .sig .bar{grid-column:1/-1; height:6px; border-radius:99px;
+            background:rgba(var(--cyr),.1); overflow:hidden}
+  .sig .bar i{display:block; height:100%; width:0; border-radius:99px;
+              background:rgba(var(--cyr),.62); transition:width .3s linear,background .3s}
+  .sig.on .nm{color:var(--ink)} .sig.on .bar i{background:var(--alarm)}
+  .sig.on .v{color:var(--alarm); font-weight:700}
+
+  .steps{display:flex; flex-direction:column; min-width:0}
+  .stepsh{padding:13px 16px; border-bottom:1px solid var(--cline,var(--line));
+          display:flex; align-items:center; gap:9px}
+  .stepsh h4{font-family:var(--clabf,var(--mono)); font-size:var(--clabs,9px);
+             letter-spacing:var(--clabt,.2em); text-transform:var(--clabc,uppercase);
+             color:var(--cy); font-weight:500}
+  .steplist{display:flex; flex-direction:column; flex:1}
+  .step{display:grid; grid-template-columns:auto 1fr; gap:3px 12px; text-align:left;
+        padding:11px 16px; border:0; border-bottom:1px solid var(--cline2,rgba(255,255,255,.05));
+        background:transparent; cursor:pointer; font-family:inherit; width:100%;
+        opacity:.28; transform:translateX(7px);
+        transition:opacity .5s ease,transform .5s ease,background .3s}
+  .step:last-child{border-bottom:0}
+  .step.seen{opacity:.62; transform:none}
+  .step.on{opacity:1; transform:none; background:rgba(var(--cyr),.09)}
+  .step:hover{opacity:1}
+  .step .sn{font-family:var(--mono); font-size:10px; color:var(--dim); padding-top:2px;
+            grid-row:1/3; width:20px}
+  .step.on .sn{color:var(--cy); font-weight:700}
+  .step .st{font-size:13.5px; font-weight:700; letter-spacing:-.015em; color:var(--ink);
+            line-height:1.25}
+  .step .sd{font-size:11.5px; line-height:1.42; color:var(--mut)}
+  .step.on .st::after{content:''; display:inline-block; width:5px; height:5px; border-radius:99px;
+                      background:var(--cy); margin-left:7px; vertical-align:middle;
+                      animation:bl 1.4s ease-in-out infinite}
+
+  .cbar{border-top:1px solid var(--cline,var(--line)); padding:15px 17px}
+  .idle{display:flex; align-items:center; justify-content:center; gap:9px; min-height:96px;
+        font-family:var(--mono); font-size:10px; letter-spacing:.18em;
+        text-transform:uppercase; color:var(--dim)}
+  .idle i{width:5px;height:5px;border-radius:99px;background:var(--dim);display:block;
+          animation:bl 2s ease-in-out infinite}
+  .alert{min-height:96px; display:grid; grid-template-columns:minmax(0,1fr) auto;
+         gap:18px; align-items:center; opacity:0; transform:translateY(8px);
+         transition:opacity .45s,transform .45s}
+  .alert.up{opacity:1; transform:none}
+  .alert .k{font-family:var(--mono); font-size:9px; letter-spacing:.18em;
+            text-transform:uppercase; color:var(--alarm); margin-bottom:7px;
+            display:flex; align-items:center; gap:7px}
+  .alert .k i{width:6px;height:6px;border-radius:99px;background:var(--alarm);display:block;
+              animation:bl 1s ease-in-out infinite}
+  .alert h4{margin:0 0 6px; font-size:19px; font-weight:800; letter-spacing:-.025em}
+  .alert p.b{font-size:13px; color:var(--mut); line-height:1.5}
+  .decide{display:flex; flex-direction:column; gap:9px; min-width:210px}
+  .dk{font-family:var(--mono); font-size:9px; letter-spacing:.16em;
+      text-transform:uppercase; color:var(--mut)}
+  .dbtns{display:flex; gap:8px; flex-wrap:wrap}
+  .decide button{font-family:var(--sans); font-size:12px; font-weight:700; padding:9px 14px;
+                 border-radius:var(--crad,6px); cursor:pointer; border:1px solid transparent}
+  .decide button.ok{background:var(--alarm); color:#2A0906}
+  .decide button.no{background:transparent; color:var(--mut); border-color:var(--cline,var(--line))}
+  .decide button.no:hover{color:var(--ink)}
+  .dnote{font-size:10.5px; line-height:1.45; color:var(--dim)}
+  .dnote b{color:var(--mut); font-variant-numeric:tabular-nums}
+  .done{font-family:var(--mono); font-size:10px; letter-spacing:.1em; line-height:1.6;
+        text-transform:uppercase; padding:11px 13px; border-radius:var(--crad,6px);
+        border:1px solid var(--cline,var(--line)); color:var(--mut)}
+  .done.hot{border-color:rgba(255,90,78,.5); color:var(--alarm)}
+  .done.cool{border-color:rgba(var(--cyr),.45); color:var(--cy)}
+
+  .ctrl{display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+        padding:13px 17px; border-top:1px solid var(--cline,var(--line))}
+  .ctrl button{font-family:var(--sans); font-size:12.5px; font-weight:700;
+               border-radius:var(--crad,7px); padding:9px 16px; cursor:pointer;
+               display:inline-flex; align-items:center; gap:8px}
+  .ctrl button svg{width:14px; height:14px}
+  #replay{color:#06121A; background:var(--cy); border:0}
+  #pp{background:transparent; color:var(--mut); border:1px solid var(--cline,var(--line))}
+  #pp:hover{color:var(--ink)}
+  #stage{margin-left:auto; font-family:var(--mono); font-size:9.5px; letter-spacing:.14em;
+         text-transform:uppercase; color:var(--mut)}
+  .undernote{margin-top:16px; font-size:13.5px; line-height:1.5; color:var(--mut);
+             max-width:70ch}
+
+  /* ================= what it spots ================= */
+  .six{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px;
+       background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden}
+  .six > div{background:var(--void); padding:26px 22px; transition:background .25s}
+  .six > div:hover{background:var(--panel)}
+  .six svg{color:var(--cy); width:30px; height:30px}
+  .six h3{margin-top:18px; font-size:17.5px}
+
+  /* ================= who decides ================= */
+  .flow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px}
+  .fcard{border:1px solid var(--line); border-radius:14px; padding:26px 24px;
+         background:var(--panel)}
+  .fcard svg{color:var(--cy); width:26px; height:26px}
+  .fcard h3{margin-top:16px}
+  .fcard p{font-size:14px; line-height:1.5; color:var(--mut); margin-top:9px}
+  .advice{margin-top:26px; display:flex; gap:14px; align-items:flex-start;
+          border:1px solid rgba(var(--cyr),.3); background:rgba(var(--cyr),.05);
+          border-radius:14px; padding:20px 22px}
+  .advice svg{width:20px; height:20px; color:var(--cy); flex:none; margin-top:2px}
+  .advice p{font-size:15px; line-height:1.5; color:var(--ink); max-width:62ch}
+  .advice p span{color:var(--mut)}
+
+  /* ================= face switch ================= */
+  .fsw{border:1px solid var(--line); border-radius:16px; background:var(--panel); overflow:hidden}
+  .fswtop{display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:22px 24px;
+          border-bottom:1px solid var(--line)}
+  .fswtop .ttl{font-size:17px; font-weight:700; letter-spacing:-.02em}
+  .fswtop .sub{font-size:13px; color:var(--mut); margin-top:3px}
+  .toggle{margin-left:auto; display:flex; align-items:center; gap:13px}
+  .toggle .lab{font-size:13px; font-weight:600; color:var(--dim)}
+  .toggle .lab.act{color:var(--cy)}
+  .tsw{width:62px; height:32px; border-radius:99px; border:1px solid var(--line);
+       background:#0A1219; position:relative; cursor:pointer; padding:0;
+       transition:background .3s,border-color .3s}
+  .tsw i{position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:99px;
+         background:var(--dim); transition:transform .3s cubic-bezier(.4,0,.2,1),background .3s}
+  .tsw[aria-checked="true"]{background:rgba(var(--cyr),.18); border-color:var(--cy)}
+  .tsw[aria-checked="true"] i{transform:translateX(30px); background:var(--cy)}
+  .fswbody{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .fswprev{padding:24px; border-right:1px solid var(--line); min-width:0}
+  .pvk{font-size:13px; font-weight:600; color:var(--mut); margin-bottom:14px}
+  .pvcard{border:1px solid var(--line); border-radius:11px; padding:16px 17px;
+          background:#0A1219; display:flex; gap:13px; align-items:flex-start}
+  .pvcard + .pvcard{margin-top:10px}
+  .pvcard svg{width:20px; height:20px; color:var(--mut); margin-top:2px}
+  .pvcard.hot svg{color:var(--alarm)}
+  .pvcard.good svg{color:var(--cy)}
+  .pvcard .t{font-size:14px; font-weight:700; letter-spacing:-.015em}
+  .pvcard .s{font-size:12.5px; color:var(--mut); line-height:1.45; margin-top:4px}
+  .fswnotes{padding:24px; display:flex; flex-direction:column; gap:16px; min-width:0}
+  .fn{display:flex; gap:12px}
+  .fn svg{width:19px; height:19px; color:var(--cy); flex:none; margin-top:2px}
+  .fn .t{font-size:14px; font-weight:700; letter-spacing:-.015em}
+  .fn .s{font-size:12.5px; color:var(--mut); line-height:1.45; margin-top:3px}
+  .fnwarn svg{color:var(--amber)}
+
+  /* ================= scoutcam ================= */
+  .ladder{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+          gap:16px; align-items:stretch}
+  .tier{border:1px solid var(--line); border-radius:16px; padding:28px 26px; background:var(--panel)}
+  .tier.next{border-color:rgba(var(--cyr),.42);
+             background:linear-gradient(180deg,rgba(var(--cyr),.07),var(--panel) 60%)}
+  .tier .tk{display:flex; align-items:center; gap:9px; font-size:13px; font-weight:700;
+            color:var(--dim)}
+  .tier .tk svg{width:17px; height:17px}
+  .tier.next .tk{color:var(--cy)}
+  .tier h3{margin-top:14px; font-size:clamp(20px,2.6vw,27px); letter-spacing:-.03em}
+  .tier p.d{font-size:14px; line-height:1.5; color:var(--mut); margin-top:10px}
+  .tier ul{margin:18px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:11px}
+  .tier li{font-size:13.5px; line-height:1.4; color:var(--mut); display:flex; gap:10px}
+  .tier li svg{width:16px; height:16px; color:var(--cy); flex:none; margin-top:2px}
+  .larrow{display:flex; align-items:center; justify-content:center; color:var(--dim)}
+  .larrow svg{width:30px; height:30px}
+  .cmp{margin-top:18px; border:1px solid var(--line); border-radius:16px;
+       background:var(--panel); padding:26px 24px}
+  .cmp .h{font-size:16px; font-weight:700; letter-spacing:-.02em}
+  .cmp .s{font-size:13.5px; color:var(--mut); line-height:1.5; margin-top:7px; max-width:62ch}
+  .cbars{margin-top:24px; display:flex; flex-direction:column; gap:14px}
+  .cb{display:grid; grid-template-columns:82px 1fr 54px; gap:14px; align-items:center}
+  .cb .l{font-size:13px; font-weight:600; color:var(--mut)}
+  .cb .t{height:9px; border-radius:99px; background:#0A1219; overflow:hidden;
+         border:1px solid var(--line2)}
+  .cb .t i{display:block; height:100%; border-radius:99px; background:rgba(var(--cyr),.5)}
+  .cb .r{font-family:var(--mono); font-size:10.5px; color:var(--mut); text-align:right;
+         font-variant-numeric:tabular-nums}
+  .cb.hit .l{color:var(--ink)} .cb.hit .t i{background:var(--alarm)}
+  .cb.hit .r{color:var(--alarm)}
+  .thline{font-size:13px; line-height:1.5; color:var(--amber); margin-top:20px;
+          padding-top:16px; border-top:1px dashed var(--line)}
+  .stats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:18px}
+  .stat{border:1px solid var(--line); border-radius:14px; padding:26px 24px; background:var(--panel)}
+  .stat .big{font-size:clamp(38px,6vw,58px); font-weight:800; letter-spacing:-.05em;
+             line-height:1; color:var(--cy)}
+  .stat .big.w{color:var(--ink)}
+  .stat .cap{font-size:13.5px; line-height:1.45; color:var(--mut); margin-top:14px}
+
+  /* ================= straight answers ================= */
+  .twocol{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px}
+  .col{border:1px solid var(--line); border-radius:16px; padding:28px 26px; background:var(--panel)}
+  .col .h{display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700;
+          letter-spacing:-.015em; margin-bottom:20px}
+  .col .h svg{width:18px; height:18px}
+  .col.yes .h{color:var(--cy)} .col.no .h{color:var(--amber)}
+  .col ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:14px}
+  .col li{font-size:15px; line-height:1.45; color:var(--mut); padding-left:22px; position:relative}
+  .col li::before{content:''; position:absolute; left:0; top:8px; width:7px; height:7px;
+                  border-radius:99px; background:var(--dim)}
+  .col.yes li::before{background:var(--cy)}
+  .col.yes li{color:var(--ink)}
+
+  /* ================= partner ================= */
+  .tracks{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px}
+  .track{border:1px solid var(--line); border-radius:16px; background:var(--panel); overflow:hidden}
+  .track .top{padding:30px 28px 26px; border-bottom:1px solid var(--line)}
+  .track .tk{display:flex; align-items:center; gap:10px; font-size:13px; font-weight:700;
+             color:var(--cy)}
+  .track .tk svg{width:17px; height:17px}
+  .track h3{margin-top:16px; font-size:clamp(21px,2.7vw,28px); letter-spacing:-.03em}
+  .track .d{font-size:14.5px; line-height:1.55; color:var(--mut); margin-top:11px}
+  .track .who{font-size:13px; line-height:1.5; color:var(--mut); margin-top:14px;
+              padding-top:14px; border-top:1px dashed var(--line)}
+  .track .who b{color:var(--ink); font-weight:700}
+  .halves{display:grid; grid-template-columns:repeat(2,minmax(0,1fr))}
+  .half{padding:24px 26px; min-width:0}
+  .half + .half{border-left:1px solid var(--line)}
+  .half .hh{font-size:13px; font-weight:700; color:var(--ink); margin-bottom:14px}
+  .half ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:11px}
+  .half li{font-size:13.5px; line-height:1.42; color:var(--mut); display:flex; gap:9px}
+  .half li svg{width:15px; height:15px; color:var(--cy); flex:none; margin-top:2px}
+  .halfb li svg{color:var(--dim)}
+
+  .starts{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px;
+          background:var(--line); border:1px solid var(--line); border-radius:14px;
+          overflow:hidden; margin-top:16px}
+  .starts > div{background:var(--void); padding:24px 22px}
+  .starts .n{font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--cy)}
+  .starts .t{font-size:16px; font-weight:700; letter-spacing:-.02em; margin-top:10px}
+  .starts .s{font-size:13px; line-height:1.45; color:var(--mut); margin-top:7px}
+
+  .cta{margin-top:16px; border:1px solid rgba(var(--cyr),.34); border-radius:16px;
+       background:linear-gradient(140deg,rgba(var(--cyr),.11),var(--panel) 62%);
+       padding:clamp(30px,4.6vw,48px); display:flex; gap:26px; flex-wrap:wrap;
+       align-items:center; justify-content:space-between}
+  .cta h3{font-size:clamp(22px,3.4vw,34px); letter-spacing:-.035em; max-width:18ch}
+  .cta p{font-size:14.5px; color:var(--mut); line-height:1.5; margin-top:11px; max-width:46ch}
+  .ctaside{display:flex; flex-direction:column; gap:12px; align-items:flex-start}
+  .ctaside .mail{font-family:var(--mono); font-size:12px; color:var(--mut)}
+
+  /* ================= footer ================= */
+  .foot{border-top:1px solid var(--line2); padding-block:38px 48px;
+        display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start}
+  .foot .fl{display:flex; gap:22px; flex-wrap:wrap; margin-left:auto}
+  .foot a,.foot button.lk{font-size:13px; color:var(--mut); text-decoration:none;
+        background:none; border:0; padding:0; cursor:pointer; font-family:var(--sans)}
+  .foot a:hover,.foot button.lk:hover{color:var(--ink)}
+  .foot small{font-size:12px; color:var(--dim); display:block; margin-top:9px; max-width:46ch;
+              line-height:1.5}
+
+  /* ================= modal ================= */
+  .ovl{position:fixed; inset:0; z-index:60; background:rgba(3,6,9,.82);
+       backdrop-filter:blur(6px); display:flex; align-items:flex-start;
+       justify-content:center; padding:24px 16px; overflow-y:auto}
+  .doc{background:var(--panel); border:1px solid var(--line); border-radius:16px;
+       max-width:720px; width:100%; margin-block:auto}
+  .dochead{display:flex; align-items:center; gap:14px; padding:22px 26px;
+           border-bottom:1px solid var(--line); position:sticky; top:0;
+           background:var(--panel); border-radius:16px 16px 0 0}
+  .dochead h3{font-size:19px; flex:1}
+  .docx{background:transparent; border:1px solid var(--line); color:var(--mut);
+        border-radius:8px; width:34px; height:34px; cursor:pointer; font-size:17px;
+        line-height:1; flex:none}
+  .docx:hover{color:var(--ink)}
+  .docbody{padding:26px 28px 32px}
+  .docbody h4{font-size:14.5px; font-weight:700; letter-spacing:-.01em; margin-top:26px}
+  .docbody h4:first-child{margin-top:0}
+  .docbody p{font-size:14px; line-height:1.62; color:var(--mut); margin-top:9px}
+  .docbody ul{margin:9px 0 0; padding-left:20px}
+  .docbody li{font-size:14px; line-height:1.62; color:var(--mut); margin-top:6px}
+  .docbody b{color:var(--ink); font-weight:600}
+  .docbody .stamp{font-size:12.5px; color:var(--dim); margin-top:30px;
+                  padding-top:18px; border-top:1px solid var(--line)}
+  .docbody .flag{margin-top:20px; border:1px solid rgba(231,169,92,.42);
+                 background:rgba(231,169,92,.07); border-radius:11px; padding:16px 18px}
+  .docbody .flag p{color:var(--amber); font-size:13.5px; margin:0}
+
+  /* ================= responsive ================= */
+  @media (max-width:960px){
+    .cgrid{grid-template-columns:minmax(0,1fr)}
+    .cleft{border-right:0; border-bottom:1px solid var(--cline,var(--line))}
+    .six,.flow,.starts{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .ladder{grid-template-columns:minmax(0,1fr)}
+    .larrow{transform:rotate(90deg); padding-block:4px}
+    .fswbody{grid-template-columns:minmax(0,1fr)}
+    .fswprev{border-right:0; border-bottom:1px solid var(--line)}
+  }
+  @media (max-width:700px){
+    .six,.flow,.starts,.rail,.stats,.twocol,.tracks{grid-template-columns:minmax(0,1fr)}
+    .halves{grid-template-columns:minmax(0,1fr)}
+    .half + .half{border-left:0; border-top:1px solid var(--line)}
+    .alert{grid-template-columns:minmax(0,1fr)}
+    .bn{margin-left:0}
+    .toggle{margin-left:0; width:100%}
+    .cb{grid-template-columns:70px 1fr 46px; gap:10px}
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+ <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M3 8V4h4M21 8V4h-4M3 16v4h4M21 16v4h-4"/><circle cx="12" cy="12" r="4.2"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/></symbol>
+ <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M12 2.6l8 3v5.9c0 4.9-3.5 8.7-8 10-4.5-1.3-8-5.1-8-10V5.6z"/><path d="M9 9.2v6.6M12 8.4v7.4M15 9.2v6.6"/></symbol>
+ <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <circle cx="12" cy="12" r="8.6"/><ellipse cx="12" cy="12" rx="3.7" ry="8.6"/><path d="M3.6 12h16.8"/></symbol>
+ <symbol id="i-weapon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M3 8V3h5M21 8V3h-5M3 16v5h5M21 16v5h-5"/><path d="M12 8.2l3.7 6.6H8.3z"/><path d="M12 11v1.4"/></symbol>
+ <symbol id="i-fall" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <circle cx="8" cy="6.4" r="2.1"/><path d="M6.6 10.4l5.6 3.2M9.4 12l-2.6 4.4M12.2 13.6l4.4-.6"/><path d="M3.6 20.4h16.8"/><path d="M15.6 6.2a6.4 6.4 0 0 1 2.2 4.6"/></symbol>
+ <symbol id="i-med" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <circle cx="12" cy="12" r="8.6"/><path d="M6.4 12.2h2.7l1.5-3.4 2.2 6.6 1.4-3.2h2.9"/></symbol>
+ <symbol id="i-car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M3.4 16.4v-3l1.8-4.2h9.2l1.8 4.2v3"/><path d="M3.4 13.4h12.8"/><circle cx="6.4" cy="17" r="1.5"/><circle cx="13.4" cy="17" r="1.5"/><path d="M18.6 6.6l2.6-1.4M19.6 10h3M18.8 13.4l2.8 1.4"/></symbol>
+ <symbol id="i-tres" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M12 2.4v19.2" stroke-dasharray="2.6 3"/><circle cx="6.6" cy="6.8" r="2.1"/><path d="M6.6 10.2v4.4M6.6 14.6l-2.2 3.8M6.6 14.6l2.2 3.8M4 11.6h5.2"/><path d="M15.4 12h4.8M17.8 9.6l2.4 2.4-2.4 2.4"/></symbol>
+ <symbol id="i-fence" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M4 20.4v-7M9 20.4v-7M14 20.4v-7M19 20.4v-7M4 15.4h15M4 18.4h15"/><path d="M4.6 10.4c3.2-5.6 11.6-5.6 14.8 0"/><path d="M19.4 10.4l-.2-2.8M19.4 10.4l2.4-1.4"/></symbol>
+ <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M4.6 12.6l4.8 4.8L19.4 6.6"/></symbol>
+ <symbol id="i-checkc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <circle cx="12" cy="12" r="8.6"/><path d="M8.2 12.4l2.6 2.6 5-5.4"/></symbol>
+ <symbol id="i-people" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <circle cx="9" cy="8" r="3"/><path d="M3.2 19.4c0-3.2 2.6-5.4 5.8-5.4s5.8 2.2 5.8 5.4"/><path d="M16.4 5.6a3 3 0 0 1 0 5.6M17.6 14.4c1.9.7 3.2 2.5 3.2 5"/></symbol>
+ <symbol id="i-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <circle cx="12" cy="12" r="8.6"/><path d="M8.4 8.4l7.2 7.2"/></symbol>
+ <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <circle cx="12" cy="12" r="8.6"/><path d="M12 7v5.4l3.4 2"/></symbol>
+ <symbol id="i-cam" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <rect x="2.6" y="7.4" width="13.6" height="9.2" rx="2"/><path d="M16.2 11l5.2-2.8v7.6L16.2 13z"/></symbol>
+ <symbol id="i-wave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M2.6 12c1.6-3.4 3.2-3.4 4.8 0s3.2 3.4 4.8 0 3.2-3.4 4.8 0 3.2 3.4 4.4 0"/><path d="M4.4 6.2c2.4-1.6 5-2.4 7.6-2.4s5.2.8 7.6 2.4" opacity=".5"/></symbol>
+ <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M11.4 2.8H20a1.2 1.2 0 0 1 1.2 1.2v8.6L11.8 22 2 12.2z"/><circle cx="16.6" cy="7.4" r="1.6"/></symbol>
+ <symbol id="i-plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M9.4 2.8v5M14.6 2.8v5"/><path d="M6.6 7.8h10.8v3.6a5.4 5.4 0 0 1-10.8 0z"/><path d="M12 16.8v4.4"/></symbol>
+ <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M4 12h15.4M13.6 6.2l5.8 5.8-5.8 5.8"/></symbol>
+ <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M7 4.6l13 7.4-13 7.4z"/></symbol>
+ <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4.6" width="4" height="14.8" rx="1"/><rect x="14" y="4.6" width="4" height="14.8" rx="1"/></symbol>
+ <symbol id="i-replay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M20.4 12a8.4 8.4 0 1 1-2.6-6.1"/><path d="M20.8 3.6v5h-5"/></symbol>
+ <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M12 3.4l9.4 16.4H2.6z"/><path d="M12 9.6v4.2M12 16.8v.1"/></symbol>
+ <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <rect x="4.4" y="10.4" width="15.2" height="10.4" rx="2.2"/><path d="M8 10.4V7.6a4 4 0 0 1 8 0v2.8"/></symbol>
+ <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+   <rect x="2.6" y="4.8" width="18.8" height="14.4" rx="2.2"/><path d="M3.2 6.6L12 13l8.8-6.4"/></symbol>
+ <symbol id="i-dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/></symbol>
+ <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M9.4 18.4h5.2M10.2 21.2h3.6"/><path d="M12 2.8a6.2 6.2 0 0 1 3.7 11.2c-.6.4-.9 1-.9 1.7v.7H9.2v-.7c0-.7-.3-1.3-.9-1.7A6.2 6.2 0 0 1 12 2.8z"/></symbol>
+</defs></svg>
+
+<nav class="nav">
+  <div class="navin">
+    <a class="logo" href="#top"><svg class="ic"><use href="#i-eye"/></svg><span>Hawk<em>eye</em></span></a>
+    <div class="navlinks">
+      <a href="#demo">The demo</a>
+      <a href="#watch">What it spots</a>
+      <a href="#who">Who decides</a>
+      <a href="#face">Face matching</a>
+      <a href="#scoutcam">ScoutCam</a>
+      <a href="#stands">Straight answers</a>
+    </div>
+    <a class="navcta" href="#partner">Work with us</a>
+  </div>
+</nav>
+
+<div class="wrap" id="top">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <div class="heroglow"></div><div class="herogrid"></div><div class="herosweep"></div>
+    <h1>Weapon detection<br>on cameras that are<br><span class="hl">already on the wall</span>.</h1>
+    <p class="lede">Hawkeye is software, so there is no box to manufacture and nothing new to
+      hang anywhere. It watches the IP cameras a building already owns. And if it suits you
+      better, <b>it runs under your name instead of ours</b>.</p>
+    <div class="herobtns">
+      <a class="btn" href="#demo"><svg class="ic"><use href="#i-play"/></svg>Watch the demo</a>
+      <a class="btn ghost" href="#partner">How this would work</a>
+    </div>
+    <div class="rail">
+      <div><svg class="ic"><use href="#i-cam"/></svg>
+        <div><p class="t">No hardware on the invoice</p>
+          <p class="s">It runs on cameras your customers have already paid for once.</p></div></div>
+      <div><svg class="ic"><use href="#i-tag"/></svg>
+        <div><p class="t">It can carry your name</p>
+          <p class="s">Console, alerts, phone notifications. All of it says whatever you
+            want it to.</p></div></div>
+      <div><svg class="ic"><use href="#i-wave"/></svg>
+        <div><p class="t">Concealed is the next step</p>
+          <p class="s">There is millimetre wave hardware behind this that sees into a bag.
+            It is not ready yet.</p></div></div>
+    </div>
+  </header>
+
+  <!-- ================= DEMO ================= -->
+  <section class="sec" id="demo">
+    <div class="sechead">
+      <h2>The whole pitch is one button.</h2>
+      <p class="lede big">Press a name below. Everything changes except the part that does
+        the work: the mark, the colour, the corners, even the words the operators read.
+        <b>Northgate and Meridian are not real companies.</b> We invented them for this page
+        rather than put up logos of customers we do not have.</p>
+    </div>
+
+    <div class="cwrap" id="cwrap">
+      <div class="brandbar">
+        <span class="bk">Skin it</span>
+        <div class="chips" id="chips"></div>
+        <span class="bn">Same detection underneath. Only the packaging moves.</span>
+      </div>
+
+      <div class="cmast">
+        <span id="clogo"></span>
+        <b id="cname">Hawkeye</b>
+        <span id="csub">Forecourt console</span>
+        <span class="sim"><i></i>Simulation &middot; not a live camera</span>
+      </div>
+
+      <div class="cgrid">
+        <div class="cleft">
+          <canvas id="field" aria-label="Simulated camera field showing people walking toward a building"></canvas>
+          <div class="pulsebar">
+            <span class="lbl" id="plabel">Return signal</span>
+            <div class="numstrip" id="numstrip" aria-hidden="true"></div>
+            <span class="cnt" id="pulseOut">Pulse 00</span>
+          </div>
+          <div class="sigs">
+            <div class="sig" data-k="keys"><span class="nm">Keys</span><span class="v">0%</span><span class="bar"><i></i></span></div>
+            <div class="sig" data-k="phone"><span class="nm">Phone</span><span class="v">0%</span><span class="bar"><i></i></span></div>
+            <div class="sig" data-k="knife"><span class="nm">Knife</span><span class="v">0%</span><span class="bar"><i></i></span></div>
+            <div class="sig" data-k="pistol"><span class="nm">Pistol</span><span class="v">0%</span><span class="bar"><i></i></span></div>
+          </div>
+        </div>
+
+        <div class="steps">
+          <div class="stepsh"><h4 id="stepsTitle">What is happening</h4></div>
+          <div class="steplist" id="steplist"></div>
+        </div>
+      </div>
+
+      <div class="cbar">
+        <div class="idle" id="idle"><i></i>No active alert &middot; scanning</div>
+        <div class="alert" id="alert" role="status" aria-live="polite" hidden>
+          <div>
+            <p class="k"><i></i><span id="aKick">Concealed firearm</span></p>
+            <h4 id="aTitle">Person in dark jacket, grey backpack</h4>
+            <p class="b"><span id="aBody">North forecourt, walking toward the main entrance.</span>
+               <span id="alertRange">47 yd out</span>, located by three cameras.</p>
+          </div>
+          <div class="decide" id="decide"></div>
+        </div>
+      </div>
+
+      <div class="ctrl">
+        <button type="button" id="replay"><svg class="ic"><use href="#i-replay"/></svg>Replay</button>
+        <button type="button" id="pp"><svg class="ic" id="ppi"><use href="#i-pause"/></svg><span id="ppt">Pause</span></button>
+        <span id="stage">Scanning</span>
+      </div>
+    </div>
+
+    <p class="undernote">This is slowed right down so you can follow it. Click any step on
+      the right to jump to that part, or pause it if somebody asks a question.</p>
+  </section>
+
+  <!-- ================= WHAT IT SPOTS ================= -->
+  <section class="sec" id="watch">
+    <div class="sechead">
+      <h2>It is not only looking for guns.</h2>
+      <p class="lede">A weapon is why anybody calls us. But the same software is watching for
+        the things that happen far more often, and a site gets those in the same box.</p>
+    </div>
+    <div class="six">
+      <div><svg class="ic"><use href="#i-weapon"/></svg><h3>A weapon in someone's hand</h3></div>
+      <div><svg class="ic"><use href="#i-fall"/></svg><h3>Somebody collapsing</h3></div>
+      <div><svg class="ic"><use href="#i-med"/></svg><h3>A medical emergency</h3></div>
+      <div><svg class="ic"><use href="#i-car"/></svg><h3>A crash in the parking lot</h3></div>
+      <div><svg class="ic"><use href="#i-tres"/></svg><h3>Someone on the property who should not be</h3></div>
+      <div><svg class="ic"><use href="#i-fence"/></svg><h3>Somebody over the fence at night</h3></div>
+    </div>
+  </section>
+
+  <!-- ================= WHO DECIDES ================= -->
+  <section class="sec" id="who">
+    <div class="sechead">
+      <h2>Nothing happens<br>until a person says so.</h2>
+      <p class="lede big">The first objection anybody raises is the same one. What stops it
+        locking down a building because somebody walked past carrying a tripod? Nothing needs
+        to, because it never gets that far on its own. <b>It sends the alert to people your
+        customer has named, and one of them decides.</b></p>
+    </div>
+    <div class="flow">
+      <div class="fcard"><svg class="ic"><use href="#i-people"/></svg>
+        <h3>Your customer writes the list</h3>
+        <p>One name or ten. They change it whenever they want and the software does not
+          care either way.</p></div>
+      <div class="fcard"><svg class="ic"><use href="#i-stop"/></svg>
+        <h3>One no and it is over</h3>
+        <p>This is not a vote and nobody needs a majority. One person calling it a false
+          alarm ends it there.</p></div>
+      <div class="fcard"><svg class="ic"><use href="#i-clock"/></svg>
+        <h3>They set the clock, not us</h3>
+        <p>If nobody is free to look, it falls back to whatever that site agreed in
+          advance.</p></div>
+    </div>
+    <div class="advice"><svg class="ic"><use href="#i-bulb"/></svg>
+      <p>Take this to a school board and the veto is the first thing they will ask about.
+        <span>Worth leading with rather than saving for the questions at the end.</span></p>
+    </div>
+  </section>
+
+  <!-- ================= FACE MATCHING ================= -->
+  <section class="sec" id="face">
+    <div class="sechead">
+      <h2>Face matching arrives switched off.</h2>
+      <p class="lede big">Most companies in this space would rather not bring it up at all.
+        We would sooner put it on the page as a switch and let you see what it actually does.
+        <b>Go ahead and flip it.</b></p>
+    </div>
+
+    <div class="fsw">
+      <div class="fswtop">
+        <div>
+          <p class="ttl">Face matching</p>
+          <p class="sub" id="fswSub">Off. That is how it arrives, every time.</p>
+        </div>
+        <div class="toggle">
+          <span class="lab act" id="labOff">Off</span>
+          <button type="button" class="tsw" id="tsw" role="switch" aria-checked="false"
+                  aria-label="Face matching"><i></i></button>
+          <span class="lab" id="labOn">On</span>
+        </div>
+      </div>
+      <div class="fswbody">
+        <div class="fswprev">
+          <p class="pvk">What an operator sees</p>
+          <div id="pvOff">
+            <div class="pvcard hot"><svg class="ic"><use href="#i-warn"/></svg>
+              <div><p class="t">Person in a dark jacket with a grey backpack</p>
+                <p class="s">That is all it knows. It describes people. It does not identify
+                  them and it is not trying to.</p></div></div>
+            <div class="pvcard"><svg class="ic"><use href="#i-people"/></svg>
+              <div><p class="t">Your caretaker sets it off too</p>
+                <p class="s">Every time he walks in. Somebody has to look at the alert and
+                  recognise him, again.</p></div></div>
+          </div>
+          <div id="pvOn" hidden>
+            <div class="pvcard good"><svg class="ic"><use href="#i-checkc"/></svg>
+              <div><p class="t">That is J. Alvarez from facilities</p>
+                <p class="s">The dull use, and the one customers actually ask for. Staff get
+                  cleared without waking anybody up.</p></div></div>
+            <div class="pvcard hot"><svg class="ic"><use href="#i-warn"/></svg>
+              <div><p class="t">This face has been here three times in nine days</p>
+                <p class="s">The other use. Somebody your customer already flagged gets
+                  picked up when they come back.</p></div></div>
+          </div>
+        </div>
+        <div class="fswnotes">
+          <div class="fn"><svg class="ic"><use href="#i-lock"/></svg>
+            <div><p class="t">Off until somebody deliberately turns it on</p>
+              <p class="s">Not a default and not hidden four levels down in a settings
+                page.</p></div></div>
+          <div class="fn fnwarn"><svg class="ic"><use href="#i-warn"/></svg>
+            <div><p class="t">Only where it is legal</p>
+              <p class="s">Biometric law varies by state and by country. Where it does not
+                fly, leave it off and everything else still works exactly the same.</p></div></div>
+          <div class="fn"><svg class="ic"><use href="#i-wave"/></svg>
+            <div><p class="t">ScoutCam never takes a picture of anybody</p>
+              <p class="s">True with the switch on and with it off. It reads numbers off a
+                returned signal, so there is no photograph of a face for anything to match
+                against.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SCOUTCAM ================= -->
+  <section class="sec" id="scoutcam">
+    <div class="sechead">
+      <h2>A camera can only see a gun<br>once it is already out.</h2>
+      <p class="lede big">That is the ceiling on software like ours and it is worth saying
+        plainly. ScoutCam is the hardware that gets past it. Millimetre wave, so it picks up
+        a gun that is <b>still inside a bag or under a coat</b>, about sixty yards before
+        anybody reaches the door. Licence the software now and this is a hardware decision
+        later on, not a second supplier to go and find.</p>
+    </div>
+
+    <div class="ladder">
+      <div class="tier">
+        <p class="tk"><svg class="ic"><use href="#i-cam"/></svg>What you can sell today</p>
+        <h3>Software on the cameras you already install</h3>
+        <p class="d">Weapon in hand, falls, medical events, crashes, trespass. Nothing to
+          manufacture and no capital tied up in stock.</p>
+        <ul>
+          <li><svg class="ic"><use href="#i-check"/></svg>Runs on ordinary IP cameras</li>
+          <li><svg class="ic"><use href="#i-check"/></svg>Your brand on the console and every alert</li>
+          <li><svg class="ic"><use href="#i-check"/></svg>The named reviewer and the veto, built in</li>
+          <li><svg class="ic"><use href="#i-check"/></svg>Ready to licence now</li>
+        </ul>
+      </div>
+      <div class="larrow"><svg class="ic"><use href="#i-arrow"/></svg></div>
+      <div class="tier next">
+        <p class="tk"><svg class="ic"><use href="#i-wave"/></svg>What comes after</p>
+        <h3>ScoutCam sees what is hidden</h3>
+        <p class="d">Millimetre wave. Every pulse comes back as tens of thousands of numbers
+          and each object leaves its own pattern. No photograph is taken at any point.</p>
+        <ul>
+          <li><svg class="ic"><use href="#i-check"/></svg>Guns inside bags and under coats</li>
+          <li><svg class="ic"><use href="#i-check"/></svg>Sixty yards, so there is time to act</li>
+          <li><svg class="ic"><use href="#i-check"/></svg>Three cameras narrow it to one person in a crowd</li>
+          <li><svg class="ic"><use href="#i-check"/></svg>Same software, same console, same brand</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cmp">
+      <p class="h">Why a pocket of keys is not a gun</p>
+      <p class="s">This is the whole reason for millimetre wave instead of a metal detector.
+        A metal detector just hears metal, so keys set it off and everybody ends up in a
+        queue. ScoutCam reads the shape of what comes back.</p>
+      <div class="cbars">
+        <div class="cb"><span class="l">Keys</span><span class="t"><i style="width:34%"></i></span><span class="r">34%</span></div>
+        <div class="cb"><span class="l">Phone</span><span class="t"><i style="width:28%"></i></span><span class="r">28%</span></div>
+        <div class="cb"><span class="l">Belt buckle</span><span class="t"><i style="width:21%"></i></span><span class="r">21%</span></div>
+        <div class="cb"><span class="l">Laptop</span><span class="t"><i style="width:41%"></i></span><span class="r">41%</span></div>
+        <div class="cb hit"><span class="l">Pistol</span><span class="t"><i style="width:94%"></i></span><span class="r">94%</span></div>
+      </div>
+      <p class="thline">These bars are drawn to show you the idea. They are not a
+        measurement, and nobody outside this company has measured it either. The next
+        section is the honest version.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><p class="big">60 yd</p><p class="cap">Range. More than half a
+        football field, which is the difference between a warning and a reaction.</p></div>
+      <div class="stat"><p class="big w">3</p><p class="cap">Cameras, crossing their
+        bearings, so a human can tell which person in a crowd is carrying.</p></div>
+      <div class="stat"><p class="big w">0</p><p class="cap">Photographs taken of anybody, at
+        any point. It is not an x-ray and it is not a body scanner.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= STRAIGHT ANSWERS ================= -->
+  <section class="sec" id="stands">
+    <div class="sechead">
+      <h2>What works, and what does not.</h2>
+      <p class="lede">A competitor picked up an FTC order in 2024 for claiming more than they
+        could back up. We would rather hand you this list ourselves than have somebody pull
+        it out of us in a meeting.</p>
+    </div>
+    <div class="twocol">
+      <div class="col yes">
+        <p class="h"><svg class="ic"><use href="#i-checkc"/></svg>This part is real</p>
+        <ul>
+          <li>The millimetre wave camera works, and we have the weapon tests on film</li>
+          <li>Eighteen months of tuning and model training went into it</li>
+          <li>The software runs on ordinary IP cameras right now</li>
+          <li>The whole thing cost under $200,000 to build</li>
+        </ul>
+      </div>
+      <div class="col no">
+        <p class="h"><svg class="ic"><use href="#i-warn"/></svg>This part is not</p>
+        <ul>
+          <li>Nobody is using one anywhere. Zero deployments</li>
+          <li>The software is unfinished, because the money ran out</li>
+          <li>Our accuracy numbers are ours. No outside lab has checked them</li>
+          <li>The camera is not ready to manufacture</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PARTNER ================= -->
+  <section class="sec" id="partner">
+    <div class="sechead">
+      <h2>You have already done the hard part.</h2>
+      <p class="lede big">You have cameras on walls and customers who pick up when you call.
+        What you have not got is weapon detection, and <b>building it from scratch is about
+        eighteen months</b> you would rather spend on something else.</p>
+    </div>
+
+    <div class="tracks">
+      <div class="track">
+        <div class="top">
+          <p class="tk"><svg class="ic"><use href="#i-tag"/></svg>One way &middot; licence it</p>
+          <h3>Your name on it</h3>
+          <p class="d">You sell weapon detection as your own product. The console, the
+            alerts, the phone notifications and the reports all say your name, exactly the
+            way the button at the top of this page shows.</p>
+          <p class="who"><b>Who this suits:</b> integrators and camera brands whose customers
+            are already asking about weapon detection.</p>
+        </div>
+        <div class="halves">
+          <div class="half">
+            <p class="hh">What you get</p>
+            <ul>
+              <li><svg class="ic"><use href="#i-check"/></svg>The detection models and the console, wearing your brand</li>
+              <li><svg class="ic"><use href="#i-check"/></svg>The named reviewer and the veto, set per site</li>
+              <li><svg class="ic"><use href="#i-check"/></svg>Face matching as an off-by-default switch you control</li>
+              <li><svg class="ic"><use href="#i-check"/></svg>First refusal on ScoutCam hardware once it is ready</li>
+            </ul>
+          </div>
+          <div class="half halfb">
+            <p class="hh">What you bring</p>
+            <ul>
+              <li><svg class="ic"><use href="#i-dot"/></svg>The customers and the selling</li>
+              <li><svg class="ic"><use href="#i-dot"/></svg>First-line support, since it is your name on the screen</li>
+              <li><svg class="ic"><use href="#i-dot"/></svg>One site willing to go first</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="track">
+        <div class="top">
+          <p class="tk"><svg class="ic"><use href="#i-plug"/></svg>The other &middot; integrate it</p>
+          <h3>Put it behind what you already sell</h3>
+          <p class="d">Detection runs behind your existing video management system and pushes
+            alerts into whatever your operators are already looking at. Your product stays
+            your product. This just becomes something it can do.</p>
+          <p class="who"><b>Who this suits:</b> VMS vendors and installers who do not want a
+            second console on the desk.</p>
+        </div>
+        <div class="halves">
+          <div class="half">
+            <p class="hh">What you get</p>
+            <ul>
+              <li><svg class="ic"><use href="#i-check"/></svg>Detection as a service behind your own interface</li>
+              <li><svg class="ic"><use href="#i-check"/></svg>Alerts in the workflow your operators already use</li>
+              <li><svg class="ic"><use href="#i-check"/></svg>Nothing ripped out on any site</li>
+              <li><svg class="ic"><use href="#i-check"/></svg>Concealed detection later on the same plumbing</li>
+            </ul>
+          </div>
+          <div class="half halfb">
+            <p class="hh">What you bring</p>
+            <ul>
+              <li><svg class="ic"><use href="#i-dot"/></svg>Camera feeds and a way into them</li>
+              <li><svg class="ic"><use href="#i-dot"/></svg>An engineer for the integration</li>
+              <li><svg class="ic"><use href="#i-dot"/></svg>One site to prove it on</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="starts">
+      <div><p class="n">First</p><p class="t">A call</p>
+        <p class="s">Half an hour. What it does, what it does not, and whether your cameras
+          are even a fit. No deck.</p></div>
+      <div><p class="n">Then</p><p class="t">A pilot on your own cameras</p>
+        <p class="s">One site, your hardware, your name on the console. This doubles as the
+          outside test neither of us has run yet.</p></div>
+      <div><p class="n">After that</p><p class="t">Terms, written down</p>
+        <p class="s">Licence scope, support, and what happens with the ScoutCam hardware.
+          Nothing on this page is the agreement.</p></div>
+    </div>
+
+    <div class="cta">
+      <div>
+        <h3>Tell us what you already sell.</h3>
+        <p>We will tell you straight whether this fits it. If it does not, that is a short
+          call and you get your afternoon back.</p>
+      </div>
+      <div class="ctaside">
+        <a class="btn" href="mailto:juliet@web4site.net?subject=Hawkeye"><svg class="ic"><use href="#i-mail"/></svg>Email Juliet</a>
+        <span class="mail">juliet@web4site.net</span>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div>
+      <a class="logo" href="#top"><svg class="ic"><use href="#i-eye"/></svg><span>Hawk<em>eye</em></span></a>
+      <small>Weapon detection software. Hawkeye EDS and Hawkeye ScoutCam. The console on
+        this page is a simulation and is not connected to a camera.</small>
+    </div>
+    <div class="fl">
+      <button type="button" class="lk" data-doc="privacy">Privacy</button>
+      <button type="button" class="lk" data-doc="terms">Terms of use</button>
+      <a href="mailto:juliet@web4site.net">Contact</a>
+    </div>
+  </footer>
+
+</div>
+
+<div class="ovl" id="ovl" role="dialog" aria-modal="true" aria-labelledby="docTitle" hidden>
+  <div class="doc">
+    <div class="dochead">
+      <h3 id="docTitle">Privacy</h3>
+      <button type="button" class="docx" id="docx" aria-label="Close">&times;</button>
+    </div>
+    <div class="docbody" id="docBody"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var DOT = ' ' + String.fromCharCode(183) + ' ';
+  var reduce = window.matchMedia &&
+               window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function $(id){ return document.getElementById(id); }
+
+  /* ============================================================
+     BRANDS
+     ============================================================ */
+  var BRANDS = [
+    {
+      key:'hawkeye', name:'Hawkeye', mark:'i-eye',
+      hex:'#5FE0DA', rgb:'95,224,218',
+      panel:'#0E161E', field:'#050A0E', line:'#1C2833', line2:'rgba(255,255,255,.05)',
+      grid:'rgba(28,40,51,.9)', body:'#8595A3', label:'#31404D',
+      radius:'4px',
+      nameFont:"'Plus Jakarta Sans',sans-serif", nameWeight:'800',
+      nameSize:'19px', nameTrack:'-.03em',
+      labFont:"'JetBrains Mono',monospace", labSize:'9px',
+      labTrack:'.2em', labCase:'uppercase',
+      sub:'Forecourt console', stepsTitle:'What is happening',
+      plabel:'Return signal', camPrefix:'CAM ', camIds:['1','2','3'],
+      pulseWord:'Pulse', valuesWord:'64,000 values',
+      kick:'Concealed firearm',
+      aTitle:'Person in dark jacket, grey backpack',
+      aBody:'North forecourt, walking toward the main entrance.',
+      waiting:'Waiting on 3 on-call admins',
+      confirm:'Confirm threat', veto:'Veto, false alarm',
+      note1:'Any one of them can veto. If nobody answers in ',
+      note2:'s it falls back to the level this site set.',
+      okMsg:'Confirmed by M. Reyes' + DOT + '911 called',
+      noMsg:'Vetoed by M. Reyes' + DOT + 'no alarm raised',
+      toMsg:'Nobody answered' + DOT + 'fell back to the site rule',
+      stages:['Scanning','Reading returns','Everyday things ruled out',
+              'Signature climbing','Crossing bearings','Waiting on a named person','Decided']
+    },
+    {
+      key:'northgate', name:'Northgate Security', mark:'i-shield',
+      hex:'#F2A33C', rgb:'242,163,60',
+      panel:'#16120B', field:'#0B0906', line:'#30260F', line2:'rgba(255,255,255,.06)',
+      grid:'rgba(48,38,15,.95)', body:'#9A8E77', label:'#4D4225',
+      radius:'18px',
+      nameFont:"'Space Grotesk',sans-serif", nameWeight:'700',
+      nameSize:'18px', nameTrack:'.06em',
+      labFont:"'Space Grotesk',sans-serif", labSize:'10.5px',
+      labTrack:'.14em', labCase:'uppercase',
+      sub:'Gate Operations', stepsTitle:'Sequence Log',
+      plabel:'Sensor Return', camPrefix:'GATE-', camIds:['01','02','03'],
+      pulseWord:'Sweep', valuesWord:'64K DATA POINTS',
+      kick:'CONCEALED FIREARM',
+      aTitle:'SUBJECT 1 / DARK JACKET / GREY PACK',
+      aBody:'NORTH GATE APPROACH, HEADING FOR MAIN DOOR.',
+      waiting:'2 duty officers on shift',
+      confirm:'Escalate now', veto:'Stand down',
+      note1:'Either officer can stand it down. No response in ',
+      note2:'s triggers the site escalation rule.',
+      okMsg:'ESCALATED BY D. OKAFOR' + DOT + '911 CALLED',
+      noMsg:'STOOD DOWN BY D. OKAFOR' + DOT + 'NO ALARM',
+      toMsg:'NO RESPONSE' + DOT + 'SITE RULE APPLIED',
+      stages:['SWEEPING','READING RETURNS','CARRY ITEMS CLEARED',
+              'SIGNATURE RISING','CROSS-BEARING','AWAITING DUTY OFFICER','CLOSED']
+    },
+    {
+      key:'meridian', name:'Meridian Protect', mark:'i-globe',
+      hex:'#9FB4FF', rgb:'159,180,255',
+      panel:'#0D1226', field:'#070A18', line:'#1F2848', line2:'rgba(255,255,255,.05)',
+      grid:'rgba(31,40,72,.95)', body:'#8E99BE', label:'#3A4670',
+      radius:'22px',
+      nameFont:"'Instrument Serif',Georgia,serif", nameWeight:'400',
+      nameSize:'25px', nameTrack:'0',
+      labFont:"'Plus Jakarta Sans',sans-serif", labSize:'12px',
+      labTrack:'0', labCase:'none',
+      sub:'Watch floor', stepsTitle:'Step by step',
+      plabel:'Reading', camPrefix:'Node ', camIds:['01','02','03'],
+      pulseWord:'Reading', valuesWord:'64,000 measurements',
+      kick:'Possible concealed firearm',
+      aTitle:'One person, dark jacket, grey backpack',
+      aBody:'Approaching the main entrance from the north forecourt.',
+      waiting:'Watch floor, five reviewers on shift',
+      confirm:'Approve response', veto:'Dismiss alert',
+      note1:'Any reviewer may dismiss this. With no decision in ',
+      note2:'s we follow the level your site has set.',
+      okMsg:'Approved by A. Lindqvist' + DOT + 'emergency services called',
+      noMsg:'Dismissed by A. Lindqvist' + DOT + 'no response raised',
+      toMsg:'No decision made' + DOT + 'site level applied',
+      stages:['Scanning','Reading returns','Everyday items ruled out',
+              'Signature rising','Cross-checking','Waiting for a reviewer','Closed']
+    }
+  ];
+
+  var B = BRANDS[0];
+  var cwrap = $('cwrap');
+
+  function svgUse(id, size){
+    return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size +
+           '" aria-hidden="true"><use href="#' + id + '"/></svg>';
+  }
+
+  /* ---------- steps ---------- */
+  var STEPS = [
+    {t:0.0,  n:'01', h:'Three cameras send a pulse',
+     d:"In millimetre wave, not light. Nothing is photographed and nobody is identified."},
+    {t:2.4,  n:'02', h:'What comes back is numbers',
+     d:"Tens of thousands of them per pulse. Metal, plastic and skin all bounce it back differently."},
+    {t:5.0,  n:'03', h:'The everyday stuff gets ruled out',
+     d:"Keys and a phone both show up. Neither of them adds up to the shape of a gun."},
+    {t:8.2,  n:'04', h:'One reading starts climbing',
+     d:"Something on one person keeps matching the pattern the model was trained on."},
+    {t:13.0, n:'05', h:'The three cameras agree on who',
+     d:"Their bearings cross. Now it is one person in the crowd, at a known distance."},
+    {t:15.6, n:'06', h:'Somebody gets asked',
+     d:"No lockdown, no siren. The person on call sees it and looks at it themselves."},
+    {t:99,   n:'07', h:"Then it is their call",
+     d:"Confirm and it escalates. Veto and it stops dead. No answer and the site rule applies."}
+  ];
+  var T_LOCK = 13.0, T_ALERT = 15.6, TIMEOUT_S = 30, PULSE_MS = 2400;
+
+  var steplist = $('steplist'), stepEls = [];
+  STEPS.forEach(function(s, i){
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'step'; b.setAttribute('data-s', i);
+    b.innerHTML = '<span class="sn">' + s.n + '</span>' +
+                  '<span class="st">' + s.h + '</span>' +
+                  '<span class="sd">' + s.d + '</span>';
+    steplist.appendChild(b); stepEls.push(b);
+  });
+  steplist.addEventListener('click', function(e){
+    var el = e.target.closest('.step'); if (!el) return;
+    var i = parseInt(el.getAttribute('data-s'), 10);
+    seek(i === STEPS.length - 1 ? T_ALERT + 0.4 : STEPS[i].t + 0.25);
+  });
+
+  /* ---------- brand chips ---------- */
+  var chips = $('chips');
+  BRANDS.forEach(function(b, i){
+    var c = document.createElement('button');
+    c.type = 'button'; c.className = 'chip' + (i === 0 ? ' on' : '');
+    c.setAttribute('data-b', i);
+    c.innerHTML = svgUse(b.mark, 15) + b.name;
+    chips.appendChild(c);
+  });
+  chips.addEventListener('click', function(e){
+    var c = e.target.closest('.chip'); if (!c) return;
+    applyBrand(parseInt(c.getAttribute('data-b'), 10));
+  });
+
+  var decideEl = $('decide');
+
+  function renderDecide(){
+    decideEl.innerHTML =
+      '<span class="dk">' + B.waiting + '</span>' +
+      '<div class="dbtns">' +
+        '<button type="button" class="ok" id="bConfirm">' + B.confirm + '</button>' +
+        '<button type="button" class="no" id="bVeto">' + B.veto + '</button>' +
+      '</div>' +
+      '<p class="dnote">' + B.note1 + '<b id="cd">30</b>' + B.note2 + '</p>';
+    $('bConfirm').addEventListener('click', function(){ settle('hot', B.okMsg); });
+    $('bVeto').addEventListener('click', function(){ settle('cool', B.noMsg); });
+  }
+  function settle(cls, text){
+    decided = true;
+    decideEl.innerHTML = '<div class="done ' + cls + '">' + text + '</div>';
+  }
+
+  function applyBrand(i){
+    B = BRANDS[i];
+    var s = cwrap.style;
+    s.setProperty('--cy', B.hex);
+    s.setProperty('--cyr', B.rgb);
+    s.setProperty('--cpanel', B.panel);
+    s.setProperty('--cfield', B.field);
+    s.setProperty('--cline', B.line);
+    s.setProperty('--cline2', B.line2);
+    s.setProperty('--crad', B.radius);
+    s.setProperty('--cfont', B.nameFont);
+    s.setProperty('--cweight', B.nameWeight);
+    s.setProperty('--csize', B.nameSize);
+    s.setProperty('--ctrack', B.nameTrack);
+    s.setProperty('--clabf', B.labFont);
+    s.setProperty('--clabs', B.labSize);
+    s.setProperty('--clabt', B.labTrack);
+    s.setProperty('--clabc', B.labCase);
+
+    $('clogo').innerHTML = svgUse(B.mark, 26);
+    $('cname').textContent = B.name;
+    $('csub').textContent = B.sub;
+    $('stepsTitle').textContent = B.stepsTitle;
+    $('plabel').textContent = B.plabel;
+    $('aKick').textContent = B.kick;
+    $('aTitle').textContent = B.aTitle;
+    $('aBody').textContent = B.aBody;
+
+    Array.prototype.forEach.call(chips.children, function(c, j){
+      c.className = 'chip' + (j === i ? ' on' : '');
+      c.setAttribute('aria-pressed', j === i ? 'true' : 'false');
+    });
+    if (!decided) renderDecide();
+    curStep = -1;
+    draw(lastT);
+  }
+
+  /* ---------- number strip ---------- */
+  var numstrip = $('numstrip'), cells = [];
+  for (var n = 0; n < 16; n++){
+    var sp = document.createElement('span'); sp.textContent = '0000';
+    numstrip.appendChild(sp); cells.push(sp);
+  }
+  function paintNumbers(hot){
+    for (var i = 0; i < cells.length; i++){
+      cells[i].textContent = String(Math.floor(Math.random() * 9000) + 1000);
+      cells[i].className = '';
+    }
+    if (hot){
+      var st = 4 + Math.floor(Math.random() * 6);
+      for (var j = 0; j < 3 && st + j < cells.length; j++) cells[st + j].className = 'hot';
+    }
+  }
+  paintNumbers(false);
+
+  /* ---------- signature rows ---------- */
+  var sigEls = {};
+  Array.prototype.forEach.call(document.querySelectorAll('.sig'), function(el){
+    sigEls[el.getAttribute('data-k')] =
+      {root:el, bar:el.querySelector('.bar i'), val:el.querySelector('.v')};
+  });
+  function setSig(k, pct, armed){
+    var s = sigEls[k]; if (!s) return;
+    var p = Math.max(0, Math.min(100, pct));
+    s.bar.style.width = p + '%';
+    s.val.textContent = Math.round(p) + '%';
+    s.root.className = 'sig' + (armed ? ' on' : '');
+  }
+  function sigAt(t){
+    return {
+      keys:  t < 1.0 ? 0 : Math.min(82, (t - 1.0) * 58),
+      phone: t < 1.7 ? 0 : Math.min(74, (t - 1.7) * 50),
+      knife: t < 8.2 ? 0 : Math.min(13, (t - 8.2) * 5),
+      pistol: t < 5.0 ? 0
+            : (t < 8.2 ? Math.min(8, (t - 5.0) * 3)
+                       : Math.min(96, 8 + (t - 8.2) * 18.4))
+    };
+  }
+
+  /* ---------- the field ---------- */
+  var cv = $('field'), ctx = cv.getContext('2d');
+  var W = 760, H = 430, MAXY = 68, ASPECT = 430 / 760;
+
+  function sizeCanvas(){
+    var r = cv.getBoundingClientRect();
+    var w = Math.max(280, r.width);
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = w; H = Math.round(w * ASPECT);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    cv.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function persp(y){ return 1 - (y / MAXY) * 0.60; }
+  function px(x, y){ return W / 2 + x * (W / 74) * persp(y); }
+  function py(y){ return H - 52 - (y / MAXY) * (H - 104); }
+  function scaleAt(y){ return 0.62 + persp(y) * 0.62; }
+
+  var CAMX = [-14, 0, 14];
+
+  var PEOPLE = [
+    {id:'A', x0:-22, y0:33, vx: 0.70, vy:-0.38, ph:0.4},
+    {id:'B', x0: 19, y0:44, vx:-0.64, vy:-0.52, ph:2.1},
+    {id:'D', x0:-27, y0:14, vx: 0.44, vy: 0.20, ph:3.6},
+    {id:'E', x0: 25, y0:20, vx:-0.34, vy: 0.14, ph:5.0}
+  ];
+  function posOf(p, t){
+    var y = p.y0 + p.vy * t;
+    if (y < 5) y = 5; if (y > MAXY - 2) y = MAXY - 2;
+    return { x: p.x0 + p.vx * t + Math.sin(t * 0.9 + p.ph) * 0.7, y: y, bob: t * 3.6 + p.ph };
+  }
+  function carrierAt(t){
+    var w = Math.min(t, T_LOCK);
+    return { x: 3.4 - w * 0.27 + Math.sin(t * 0.8) * 0.5, y: 64 - w * 3.0, bob: t * 3.6 };
+  }
+
+  /* ---------- drawing ---------- */
+  function ground(){
+    ctx.save();
+    ctx.strokeStyle = B.grid; ctx.lineWidth = 1;
+    var xs = [-30,-20,-10,0,10,20,30], ys = [10,20,30,40,50,60];
+    xs.forEach(function(x){
+      ctx.beginPath();
+      ctx.moveTo(px(x, 0), py(0)); ctx.lineTo(px(x, MAXY), py(MAXY)); ctx.stroke();
+    });
+    ys.forEach(function(y){
+      ctx.beginPath();
+      ctx.moveTo(px(-34, y), py(y)); ctx.lineTo(px(34, y), py(y)); ctx.stroke();
+    });
+    ctx.fillStyle = B.label;
+    ctx.font = '500 9.5px "JetBrains Mono", monospace';
+    [20,40,60].forEach(function(y){
+      ctx.fillText(y + ' yd', px(-34, y) + 6, py(y) - 6);
+    });
+    ctx.restore();
+  }
+  function fov(){
+    ctx.save();
+    CAMX.forEach(function(cx){
+      var g = ctx.createLinearGradient(0, py(0), 0, py(MAXY));
+      g.addColorStop(0, 'rgba(' + B.rgb + ',.055)');
+      g.addColorStop(1, 'rgba(' + B.rgb + ',0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.moveTo(px(cx, 0), py(0));
+      ctx.lineTo(px(cx - 20, MAXY), py(MAXY));
+      ctx.lineTo(px(cx + 20, MAXY), py(MAXY));
+      ctx.closePath(); ctx.fill();
+    });
+    ctx.restore();
+  }
+  function wavefront(radius, alpha){
+    if (alpha <= 0) return;
+    ctx.save();
+    CAMX.forEach(function(cx){
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(' + B.rgb + ',' + alpha.toFixed(3) + ')';
+      ctx.lineWidth = 1.4;
+      var steps = 28, started = false;
+      for (var i = 0; i <= steps; i++){
+        var a = Math.PI * (i / steps);
+        var wy = Math.sin(a) * radius;
+        if (wy > MAXY) { started = false; continue; }
+        var wx = cx + Math.cos(a) * radius * 0.62;
+        var sx = px(wx, wy), sy = py(wy);
+        if (!started){ ctx.moveTo(sx, sy); started = true; } else ctx.lineTo(sx, sy);
+      }
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+  function building(){
+    var top = py(0) + 14;
+    ctx.fillStyle = B.panel; ctx.fillRect(0, top, W, H - top);
+    ctx.fillStyle = B.line; ctx.fillRect(0, top, W, 1);
+    ctx.fillStyle = B.label;
+    ctx.font = '500 9px "JetBrains Mono", monospace';
+    ctx.fillText('BUILDING FACE', 14, H - 14);
+  }
+  function cams(){
+    CAMX.forEach(function(cx, i){
+      var x = px(cx, 0), y = py(0);
+      ctx.save();
+      ctx.fillStyle = B.panel; ctx.strokeStyle = B.hex; ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x - 13, y - 9, 26, 18, 4);
+      else ctx.rect(x - 13, y - 9, 26, 18);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = B.hex;
+      ctx.beginPath(); ctx.arc(x - 4.5, y, 2.3, 0, 7); ctx.fill();
+      ctx.globalAlpha = .45;
+      ctx.beginPath(); ctx.arc(x + 4.5, y, 2.3, 0, 7); ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = B.label;
+      ctx.font = '500 8.5px "JetBrains Mono", monospace';
+      var lbl = B.camPrefix + B.camIds[i];
+      ctx.fillText(lbl, x - ctx.measureText(lbl).width / 2, y + 26);
+      ctx.restore();
+    });
+  }
+  function figure(x, y, s, col, lw, bob){
+    var sw = Math.sin(bob) * 3.2 * s;
+    ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(x, y - 15 * s, 3.6 * s, 0, 7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, y - 11 * s); ctx.lineTo(x, y - 1 * s); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x - 4.4 * s, y - 6 * s); ctx.lineTo(x, y - 9 * s);
+    ctx.lineTo(x + 4.4 * s, y - 6 * s); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x - sw, y + 7 * s); ctx.lineTo(x, y - 1 * s);
+    ctx.lineTo(x + sw, y + 7 * s); ctx.stroke();
+  }
+  function shadow(x, y, s){
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,.42)';
+    ctx.beginPath(); ctx.ellipse(x, y + 8 * s, 7 * s, 2.2 * s, 0, 0, 7); ctx.fill();
+    ctx.restore();
+  }
+  function bearings(cx, cy, k){
+    CAMX.forEach(function(camx){
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,90,78,' + (0.22 + 0.42 * k).toFixed(3) + ')';
+      ctx.lineWidth = 1; ctx.setLineDash([5, 4]);
+      var sx = px(camx, 0), sy = py(0);
+      ctx.beginPath(); ctx.moveTo(sx, sy);
+      ctx.lineTo(sx + (cx - sx) * k, sy + (cy - sy) * k);
+      ctx.stroke(); ctx.restore();
+    });
+  }
+  function grain(t){
+    ctx.save(); ctx.globalAlpha = .035; ctx.fillStyle = '#FFFFFF';
+    for (var i = 0; i < 40; i++){
+      ctx.fillRect(Math.random() * W, Math.random() * H, 1, 1);
+    }
+    ctx.globalAlpha = .022; ctx.fillStyle = B.hex;
+    var band = ((t * 34) % (H + 90)) - 45;
+    ctx.fillRect(0, band, W, 34);
+    ctx.restore();
+  }
+
+  /* ---------- state ---------- */
+  var t0 = performance.now(), lastFrame = t0, lastPulse = -1, lastT = 0;
+  var decided = false, paused = false, alertShown = false, curStep = -1;
+  var alertEl = $('alert'), idleEl = $('idle'), stageEl = $('stage');
+
+  function stepFor(t){
+    var i = 0;
+    for (var k = 0; k < STEPS.length; k++) if (t >= STEPS[k].t) i = k;
+    if (decided) i = STEPS.length - 1;
+    return i;
+  }
+  function markSteps(i){
+    if (i === curStep) return;
+    curStep = i;
+    stepEls.forEach(function(el, j){
+      el.className = 'step' + (j < i ? ' seen' : (j === i ? ' on' : ''));
+    });
+    stageEl.textContent = B.stages[Math.min(i, B.stages.length - 1)];
+  }
+
+  function seek(sec){
+    t0 = performance.now() - sec * 1000;
+    lastFrame = performance.now(); lastPulse = -1; curStep = -1;
+    decided = false; alertShown = false;
+    alertEl.className = 'alert'; alertEl.hidden = true; idleEl.hidden = false;
+    renderDecide();
+    paused = false; setPP();
+    draw(sec);
+  }
+  function restart(){ seek(0); }
+
+  function setPP(){
+    $('ppi').innerHTML = '<use href="#' + (paused ? 'i-play' : 'i-pause') + '"/>';
+    $('ppt').textContent = paused ? 'Play' : 'Pause';
+  }
+  $('replay').addEventListener('click', restart);
+  $('pp').addEventListener('click', function(){ paused = !paused; setPP(); });
+
+  /* ---------- one frame ---------- */
+  function draw(t){
+    lastT = t;
+    ctx.fillStyle = B.field; ctx.fillRect(0, 0, W, H);
+    fov(); ground();
+
+    var ph = (t * 1000 % PULSE_MS) / PULSE_MS;
+    var pNo = Math.floor(t * 1000 / PULSE_MS);
+    if (pNo !== lastPulse){
+      lastPulse = pNo;
+      $('pulseOut').textContent = B.pulseWord + ' ' +
+        String(pNo % 100).padStart(2, '0') + DOT + B.valuesWord;
+      paintNumbers(t >= STEPS[3].t);
+    }
+    var radius = 4 + ph * 66;
+    wavefront(radius, ph < .72 ? (1 - ph / .72) * 0.32 : 0);
+
+    var sg = sigAt(t);
+    setSig('keys', sg.keys, false);
+    setSig('phone', sg.phone, false);
+    setSig('knife', sg.knife, false);
+    setSig('pistol', sg.pistol, t >= T_LOCK);
+
+    var locked = t >= T_LOCK;
+    var C = carrierAt(t);
+    var cx = px(C.x, C.y), cy = py(C.y), cs = scaleAt(C.y);
+
+    PEOPLE.forEach(function(p){
+      var q = posOf(p, t);
+      var x = px(q.x, q.y), y = py(q.y), s = scaleAt(q.y);
+      var lit = Math.abs(q.y - radius) < 3.2;
+      shadow(x, y, s);
+      figure(x, y, s, lit ? 'rgba(' + B.rgb + ',.85)' : B.body, 1.7 * s, q.bob);
+    });
+
+    var litC = Math.abs(C.y - radius) < 3.2;
+    shadow(cx, cy, cs);
+    figure(cx, cy, cs,
+           locked ? '#FF5A4E' : (litC ? 'rgba(' + B.rgb + ',.9)' : B.body),
+           (locked ? 2.1 : 1.7) * cs, C.bob);
+
+    if (sg.pistol > 12){
+      var a = Math.min(1, (sg.pistol - 12) / 60);
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.fillStyle = locked ? '#FF5A4E' : B.hex;
+      ctx.beginPath();
+      ctx.ellipse(cx + 4.2 * cs, cy - 4 * cs, 3 * cs, 4.4 * cs, -0.35, 0, 7);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    if (locked){
+      var lk = Math.min(1, (t - T_LOCK) / 2.2);
+      bearings(cx, cy, lk);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,90,78,.8)'; ctx.lineWidth = 1.3;
+      var rr = 20 * cs + Math.sin(t * 3) * 1.6;
+      ctx.beginPath(); ctx.arc(cx, cy - 5 * cs, rr, 0, 7); ctx.stroke();
+      ctx.fillStyle = '#FF5A4E';
+      ctx.font = '700 10px "JetBrains Mono", monospace';
+      ctx.fillText(Math.max(0, Math.round(C.y)) + ' YD', cx + rr + 6, cy - 5 * cs + 3);
+      ctx.restore();
+    }
+
+    building(); cams();
+    if (!reduce) grain(t);
+
+    var wantAlert = t >= T_ALERT;
+    if (wantAlert && !alertShown){
+      alertShown = true;
+      idleEl.hidden = true; alertEl.hidden = false;
+      requestAnimationFrame(function(){ alertEl.className = 'alert up'; });
+    } else if (!wantAlert && alertShown){
+      alertShown = false;
+      alertEl.className = 'alert'; alertEl.hidden = true; idleEl.hidden = false;
+    }
+    if (wantAlert){
+      $('alertRange').textContent = Math.max(0, Math.round(C.y)) + ' yd out';
+      if (!decided){
+        var left = TIMEOUT_S - (t - T_ALERT) * 1.6;
+        if (left <= 0) settle('hot', B.toMsg);
+        else { var cd = $('cd'); if (cd) cd.textContent = Math.ceil(left); }
+      }
+    }
+
+    markSteps(stepFor(t));
+  }
+
+  function loop(now){
+    if (paused) t0 += (now - lastFrame);
+    lastFrame = now;
+    draw((now - t0) / 1000);
+    requestAnimationFrame(loop);
+  }
+
+  var rt;
+  window.addEventListener('resize', function(){
+    clearTimeout(rt); rt = setTimeout(function(){ sizeCanvas(); draw(lastT); }, 140);
+  });
+
+  sizeCanvas();
+  renderDecide();
+  applyBrand(0);
+  requestAnimationFrame(loop);
+
+  /* ============================================================
+     FACE MATCHING SWITCH
+     ============================================================ */
+  var tsw = $('tsw');
+  tsw.addEventListener('click', function(){
+    var on = tsw.getAttribute('aria-checked') !== 'true';
+    tsw.setAttribute('aria-checked', on ? 'true' : 'false');
+    $('pvOff').hidden = on; $('pvOn').hidden = !on;
+    $('labOff').className = 'lab' + (on ? '' : ' act');
+    $('labOn').className  = 'lab' + (on ? ' act' : '');
+    $('fswSub').textContent = on
+      ? 'On. Only where the law allows it, and only if your customer asks.'
+      : 'Off. That is how it arrives, every time.';
+  });
+
+  /* ============================================================
+     LEGAL
+     ============================================================ */
+  var DOCS = {
+    privacy: {
+      title: 'Privacy',
+      body:
+        '<h4>What this website collects</h4>' +
+        '<p><b>Nothing at all.</b> There are no forms here, no accounts, no sign-up, no ' +
+        'analytics, no advertising pixels and no cookies. Whatever you click on this page ' +
+        'stays on this page.</p>' +
+        '<p>Two things do leave your browser when it loads: the page itself from wherever ' +
+        'it is hosted, and the typefaces from Google Fonts. Those services see what any web ' +
+        'request shows them, including your IP address. None of it comes to us.</p>' +
+        '<h4>If you email us</h4>' +
+        '<p>The contact button opens your own email program. If you write to us, your ' +
+        'message and your address sit in an ordinary mailbox so we can write back. We do ' +
+        'not put you on a list and we do not pass it to anybody. Ask us to delete it and ' +
+        'we will.</p>' +
+        '<h4>The console at the top of the page</h4>' +
+        '<p>It is an animation written into this page. It is not connected to a camera, ' +
+        'there is no real footage in it, and nobody in it is a real person. Northgate ' +
+        'Security and Meridian Protect are invented names used to show what white labelling ' +
+        'looks like. They are not customers, not partners and not real companies.</p>' +
+        '<h4>The product is a separate question</h4>' +
+        '<p>This notice is about the website. Hawkeye software processes video on a ' +
+        "customer's own system, and how long that footage is kept, who can see it and where " +
+        'it lives all belong in a data-handling agreement written for that deployment. ' +
+        '<b>There are no deployments today</b> and that agreement is not this document.</p>' +
+        '<h4>Two things worth saying plainly</h4>' +
+        '<ul>' +
+        '<li>The millimetre wave camera does not photograph anybody. It measures reflected ' +
+        'signal and hands back numbers. There is no picture of a person to store.</li>' +
+        '<li>Face matching is off by default and gets switched on only where the law allows ' +
+        "it, at the customer's decision.</li>" +
+        '</ul>' +
+        '<div class="flag"><p>This covers the website. A product privacy policy and a ' +
+        'data-handling agreement still have to be written with qualified counsel before any ' +
+        'camera is pointed at anybody. Neither of them exists yet.</p></div>' +
+        '<h4>Contact</h4>' +
+        '<p>Juliet Sonnenberg, <a href="mailto:juliet@web4site.net" style="color:inherit">' +
+        'juliet@web4site.net</a></p>' +
+        '<p class="stamp">Last updated 19 September 2026</p>'
+    },
+    terms: {
+      title: 'Terms of use',
+      body:
+        '<h4>What this page is</h4>' +
+        '<p>This site describes software that is <b>still being built and is not finished</b>. ' +
+        'It is written for companies who might licence it or build it into what they already ' +
+        'sell. It is information, not an offer.</p>' +
+        '<h4>None of this is a contract</h4>' +
+        '<p>Nothing here is an offer to sell, a quote, a warranty, a service level or a ' +
+        'promise to deliver anything by any date. If we end up working together, a written ' +
+        'licence agreement covers that, and it will say the things a web page cannot.</p>' +
+        '<h4>About the numbers</h4>' +
+        '<ul>' +
+        '<li>Any performance figure on this page is <b>ours and self-measured</b>. No ' +
+        'independent laboratory has tested this system.</li>' +
+        '<li>The signature bars in the ScoutCam section are drawn to show the principle. ' +
+        'They are not a measurement, and the page says so directly underneath them.</li>' +
+        '<li>The section headed "What works, and what does not" is the accurate one. Where ' +
+        'anything else on this page disagrees with it, that section wins.</li>' +
+        '</ul>' +
+        '<h4>The console</h4>' +
+        '<p>The demo near the top is an animation. It is not live, not attached to any ' +
+        'hardware, and not a recording of a real detection. It is there to show how the ' +
+        'workflow runs, including the part where a named person decides.</p>' +
+        '<h4>The invented names</h4>' +
+        '<p><b>Northgate Security</b> and <b>Meridian Protect</b> do not exist. They were ' +
+        'made up for the white-label demonstration so that no real company appears here as ' +
+        'a customer. Hawkeye has no deployments and no customers today.</p>' +
+        '<h4>Not advice</h4>' +
+        '<p>Nothing on this page is legal, security, safety or emergency-planning advice. ' +
+        'Decisions about weapons policy, lockdown procedure, biometric consent and when to ' +
+        'call emergency services belong to the organisation running the site and to its own ' +
+        'advisers.</p>' +
+        '<h4>Intellectual property</h4>' +
+        '<p>The words, graphics and code on this page belong to Hawkeye. The brand marks in ' +
+        'the white-label demonstration were drawn for this page and represent nobody.</p>' +
+        '<div class="flag"><p>These are terms of use for a website. They are not a licence ' +
+        'agreement, a reseller agreement or a services contract. Those have to be drafted ' +
+        'with qualified counsel before anything is sold.</p></div>' +
+        '<h4>Contact</h4>' +
+        '<p>Juliet Sonnenberg, <a href="mailto:juliet@web4site.net" style="color:inherit">' +
+        'juliet@web4site.net</a></p>' +
+        '<p class="stamp">Last updated 19 September 2026</p>'
+    }
+  };
+
+  var ovl = $('ovl'), lastFocus = null;
+  function openDoc(k){
+    var d = DOCS[k]; if (!d) return;
+    lastFocus = document.activeElement;
+    $('docTitle').textContent = d.title;
+    $('docBody').innerHTML = d.body;
+    ovl.hidden = false;
+    document.body.style.overflow = 'hidden';
+    $('docx').focus();
+  }
+  function closeDoc(){
+    ovl.hidden = true;
+    document.body.style.overflow = '';
+    if (lastFocus) lastFocus.focus();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-doc]'), function(b){
+    b.addEventListener('click', function(){ openDoc(b.getAttribute('data-doc')); });
+  });
+  $('docx').addEventListener('click', closeDoc);
+  ovl.addEventListener('click', function(e){ if (e.target === ovl) closeDoc(); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && !ovl.hidden) closeDoc();
+  });
+})();
+</script>
